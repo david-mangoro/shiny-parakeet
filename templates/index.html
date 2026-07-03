@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Article Dashboard | TEL & Open Education</title>
+    <meta name="description" content="A curated dashboard fetching research articles from EuroDL and Google Scholar on Technology Enhanced Learning.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon"></div>
+                <div class="logo-text">
+                    <h1>ScholarPulse</h1>
+                    <p>Research Feed Insights</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="help-btn" class="btn btn-secondary" aria-label="How it works">
+                    <span>💡 How it Works</span>
+                </button>
+                <button id="refresh-btn" class="btn btn-primary" aria-label="Refresh articles">
+                    <span class="btn-text">Refresh Feed</span>
+                    <div class="spinner" id="btn-spinner" hidden></div>
+                </button>
+                <button id="theme-toggle" class="btn btn-secondary" aria-label="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <section class="stats-bar">
+            <div class="stat-card">
+                <span class="stat-label">Last Updated</span>
+                <span id="last-updated" class="stat-value">Never</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Feed Status</span>
+                <span id="feed-status" class="stat-value status-idle">Idle</span>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <main class="dashboard-grid">
+            <!-- EuroDL Column -->
+            <section class="column-section" aria-labelledby="eurodl-heading">
+                <div class="column-header">
+                    <div class="source-badge badge-eurodl">EuroDL</div>
+                    <h2 id="eurodl-heading">European Journal of Open & Distance Learning</h2>
+                </div>
+                <div class="article-list" id="eurodl-list">
+                    <!-- Dynamic Content -->
+                    <div class="skeleton-container">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scholar Column -->
+            <section class="column-section" aria-labelledby="scholar-heading">
+                <div class="column-header">
+                    <div class="source-badge badge-scholar">Scholar</div>
+                    <h2 id="scholar-heading">Technology Enhanced Learning (Google Scholar)</h2>
+                </div>
+                <div class="article-list" id="scholar-list">
+                    <!-- Dynamic Content -->
+                    <div class="skeleton-container">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script Generator Modal -->
+    <div id="action-modal" class="modal" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Convert Article</h3>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Script Options -->
+                <div class="script-options">
+                    <div class="option-field">
+                        <label for="script-tone">🎭 Script Tone</label>
+                        <select id="script-tone" class="select-input">
+                            <option value="academic">Academic & Informative</option>
+                            <option value="casual" selected>Casual & Conversational</option>
+                            <option value="edutainment">Edutainment (Engaging & Punchy)</option>
+                        </select>
+                    </div>
+                    <div class="option-field">
+                        <label for="script-length">⏱️ Script Length</label>
+                        <select id="script-length" class="select-input">
+                            <option value="short">60s Short (TikTok/Reels)</option>
+                            <option value="medium" selected>3-5 mins Standard Video/Podcast</option>
+                            <option value="long">10 mins Deep Dive Video/Podcast</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-tabs">
+                    <button class="tab-btn active" data-tab="youtube">🎥 YouTube Script</button>
+                    <button class="tab-btn" data-tab="podcast">🎙️ Podcast Script</button>
+                </div>
+                <div class="tab-content" id="tab-youtube">
+                    <div class="script-box">
+                        <div class="script-meta">
+                            <span id="yt-format-lbl">Format: Solo Video</span>
+                            <div class="script-actions">
+                                <button class="btn btn-secondary btn-sm btn-tts" data-target="yt-script-text">🔊 Listen</button>
+                                <button class="btn btn-primary btn-sm btn-copy" data-target="yt-script-text">Copy Script</button>
+                            </div>
+                        </div>
+                        <pre id="yt-script-text" class="script-pre"></pre>
+                    </div>
+                </div>
+                <div class="tab-content hidden" id="tab-podcast">
+                    <div class="script-box">
+                        <div class="script-meta">
+                            <span id="pod-format-lbl">Format: Co-host Podcast Outline</span>
+                            <div class="script-actions">
+                                <button class="btn btn-secondary btn-sm btn-tts" data-target="pod-script-text">🔊 Listen</button>
+                                <button class="btn btn-primary btn-sm btn-copy" data-target="pod-script-text">Copy Script</button>
+                            </div>
+                        </div>
+                        <pre id="pod-script-text" class="script-pre"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Citation Modal -->
+    <div id="cite-modal" class="modal" hidden>
+        <div class="modal-content modal-content-sm">
+            <div class="modal-header">
+                <h3>Cite Article</h3>
+                <button id="close-cite-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="cite-group">
+                    <div class="cite-header">
+                        <span>APA Format</span>
+                        <button class="btn-copy-link btn-copy" data-target="cite-apa">Copy</button>
+                    </div>
+                    <div id="cite-apa" class="cite-text"></div>
+                </div>
+                <div class="cite-group">
+                    <div class="cite-header">
+                        <span>MLA Format</span>
+                        <button class="btn-copy-link btn-copy" data-target="cite-mla">Copy</button>
+                    </div>
+                    <div id="cite-mla" class="cite-text"></div>
+                </div>
+                <div class="cite-group">
+                    <div class="cite-header">
+                        <span>BibTeX Format</span>
+                        <button class="btn-copy-link btn-copy" data-target="cite-bibtex">Copy</button>
+                    </div>
+                    <pre id="cite-bibtex" class="cite-pre"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help / How it Works Modal -->
+    <div id="help-modal" class="modal" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💡 How ScholarPulse Works</h3>
+                <button id="close-help-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-steps">
+                    <div class="help-step">
+                        <div class="step-icon">🔍</div>
+                        <div class="step-info">
+                            <h4>1. Live Scraping & Fallbacks</h4>
+                            <p>When you click <strong>Refresh Feed</strong>, the backend scraper fetches the latest research directly from EuroDL and Google Scholar. If Google Scholar blocks requests, the system auto-switches to the open-access <strong>OpenAlex API</strong> to fetch stable metadata.</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-icon">⚙️</div>
+                        <div class="step-info">
+                            <h4>2. Tone & Length Customization</h4>
+                            <p>Clicking <strong>⚡ Convert</strong> opens script generators. You can customize the tone (e.g. Casual, Academic, Edutainment) and length (60s Short, 3-5m Video, 10m deep dive) to dynamically update script outputs.</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-icon">🔊</div>
+                        <div class="step-info">
+                            <h4>3. Text-to-Speech Preview</h4>
+                            <p>Click <strong>🔊 Listen</strong> to have your browser narrate the script automatically. It filters out host markers and director annotations to read only clean, conversational content.</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-icon">📖</div>
+                        <div class="step-info">
+                            <h4>4. Citations & Social Sharing</h4>
+                            <p>Click <strong>🐦 Tweet</strong> to immediately draft a tweet with key findings, or click <strong>📖 Cite</strong> to grab pre-formatted APA, MLA, and BibTeX citations for your reference manager.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<footer class="app-footer">
+    <p>Designed by <a href="https://visiondesignlab.com" target="_blank" rel="noopener">visiondesignlab.com</a></p>
+</footer>
+
+    <!-- Script -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
