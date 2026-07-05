@@ -2,8 +2,7 @@
 
 A sleek Flask web application that fetches the latest research articles:
 
-- **EuroDL** – the three most recent articles from the European Journal of Open & Distance Learning.
-- **Technology‑Enhanced Learning** – three articles sourced via the OpenAlex API (fallback for Google Scholar).
+uses API to fetch few random aricles to technology enhanced learning then you can turn them into script for youtube or podcast narration.
 
 The UI features a dark‑mode default, a refresh button with a loading spinner, a **How it works** modal, and a footer credit to VisionDesignLab.
 
