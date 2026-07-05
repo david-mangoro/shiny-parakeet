@@ -49,13 +49,15 @@
             </div>
         </section>
 
+
         <!-- Main Content Grid -->
         <main class="dashboard-grid">
-            <!-- EuroDL Column -->
+
+            <!-- EuroDL Column (Now CORE Open Access) -->
             <section class="column-section" aria-labelledby="eurodl-heading">
                 <div class="column-header">
-                    <div class="source-badge badge-eurodl">EuroDL</div>
-                    <h2 id="eurodl-heading">European Journal of Open & Distance Learning</h2>
+                    <div class="source-badge badge-eurodl">CORE OA</div>
+                    <h2 id="eurodl-heading">Distance Learning & Open Education (CORE)</h2>
                 </div>
                 <div class="article-list" id="eurodl-list">
                     <!-- Dynamic Content -->
@@ -67,11 +69,11 @@
                 </div>
             </section>
 
-            <!-- Scholar Column -->
+            <!-- Scholar Column (Now CORE Research) -->
             <section class="column-section" aria-labelledby="scholar-heading">
                 <div class="column-header">
-                    <div class="source-badge badge-scholar">Scholar</div>
-                    <h2 id="scholar-heading">Technology Enhanced Learning (Google Scholar)</h2>
+                    <div class="source-badge badge-scholar">CORE Works</div>
+                    <h2 id="scholar-heading">Technology Enhanced Learning (CORE)</h2>
                 </div>
                 <div class="article-list" id="scholar-list">
                     <!-- Dynamic Content -->
@@ -160,6 +162,7 @@
                     </div>
                     <div id="cite-apa" class="cite-text"></div>
                 </div>
+
                 <div class="cite-group">
                     <div class="cite-header">
                         <span>MLA Format</span>
@@ -190,8 +193,8 @@
                     <div class="help-step">
                         <div class="step-icon">🔍</div>
                         <div class="step-info">
-                            <h4>1. Live Scraping & Fallbacks</h4>
-                            <p>When you click <strong>Refresh Feed</strong>, the backend scraper fetches the latest research directly from EuroDL and Google Scholar. If Google Scholar blocks requests, the system auto-switches to the open-access <strong>OpenAlex API</strong> to fetch stable metadata.</p>
+                            <h4>1. Live CORE API Feeds</h4>
+                            <p>When you click <strong>Refresh Feed</strong>, the backend queries the official open-access <strong>CORE API v3</strong> database to retrieve the latest and most relevant peer-reviewed works in Technology-Enhanced Learning and Open Education.</p>
                         </div>
                     </div>
                     <div class="help-step">
@@ -227,3 +230,4 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
+

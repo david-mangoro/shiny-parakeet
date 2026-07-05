@@ -266,24 +266,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateScriptContent = (art, tone, length) => {
         let hook = "";
         let body = "";
+        let methodology = art.method || "The paper details key structural models and research designs within the field.";
         let conclusionPart = "";
         let outro = "";
 
-        // Customize hooks based on tone
+        // Customize hooks and body based on tone
+        const introduction = art.abstract || art.summary || "No introduction extracted.";
+        const findings = art.findings || "No specific statistical findings extracted.";
+        const conclusions = art.conclusion || "Full conclusions available in publication.";
+
         if (tone === 'academic') {
             hook = `Welcome to this scientific critique. Today we evaluate research titled "${art.title}" by ${art.authors}.`;
-            body = `The core thesis of this work investigates the following: "${art.summary}"`;
-            conclusionPart = `The findings indicate: "${art.findings}"`;
+            body = `The core thesis of this work investigates the following: "${introduction}" \n\nMethodologically: "${methodology}"`;
+            conclusionPart = `The findings indicate: "${findings}" \n\nConclusions: "${conclusions}"`;
             outro = `For the complete statistical dataset, please follow the publication citation link: ${art.link}`;
         } else if (tone === 'edutainment') {
             hook = `Stop scrolling! 🚨 This new study might change how you look at digital education forever. Let's break down "${art.title}"!`;
-            body = `Here's the problem: "${art.summary.substring(0, 200)}..." Yeah, that's what the researchers set out to solve.`;
-            conclusionPart = `And what did they discover? Get this: "${art.findings}" Absolutely mind-blowing.`;
+            body = `Here's the problem: "${introduction.substring(0, 250)}..." Yeah, that's what the researchers set out to solve.\n\nHere is how they did it: "${methodology.substring(0, 200)}..."`;
+            conclusionPart = `And what did they discover? Get this: "${findings}" \n\nTheir final takeaway: "${conclusions.substring(0, 250)}..." Absolutely mind-blowing.`;
             outro = `Want to read the full source text? The link is right below. Subscribe for more crazy research updates!`;
         } else { // casual
             hook = `Hey friends! Today I'm checking out a super interesting research paper. It's called "${art.title}".`;
-            body = `So, what is it about? The summary describes it as: "${art.summary}"`;
-            conclusionPart = `The cool part is the conclusion they reached. Essentially, they found: "${art.findings}"`;
+            body = `So, what is it about? The summary describes it as: "${introduction}" \n\nRegarding how they studied this: "${methodology}"`;
+            conclusionPart = `The cool part is the conclusion they reached. Essentially, they found: "${findings}" \n\nAnd they discuss: "${conclusions}"`;
             outro = `Definitely check this out if you're interested in the field. I've left the link right here: ${art.link}`;
         }
 
@@ -292,13 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (length === 'short') {
             lengthNote = "approx. 60 seconds (Short/Reel)";
             hook = `🔥 Quick research fact: did you know about "${art.title.substring(0, 50)}..."?`;
-            body = `This study states: "${art.summary.substring(0, 120)}..."`;
-            conclusionPart = `Main takeaway: "${art.findings.substring(0, 150)}..."`;
+            body = `This study states: "${introduction.substring(0, 150)}..."`;
+            conclusionPart = `Takeaway: "${findings.substring(0, 150)}..."`;
             outro = `Check link for more!`;
         } else if (length === 'long') {
             lengthNote = "approx. 10 mins (Deep Dive)";
-            body += `\n\nLet's analyze the methodology. The researchers gathered detailed data to support this abstract. By looking closely at the participant groups, we can understand the real-world implications of these theoretical models.`;
-            conclusionPart += `\n\nIn terms of future research, these conclusions suggest we need to rethink current models. The implications are deep because it connects theory directly with structural design.`;
+            body += `\n\nAnalyzing the implementation: ${methodology} This connects directly with participant setups and the empirical variables described by the authors.`;
+            conclusionPart += `\n\nReviewing the broader scope: ${conclusions} This suggests we need to rethink current models. The implications are deep because it links theory directly with design.`;
         }
 
         // Return formatted strings
@@ -310,7 +315,7 @@ TONE: ${tone.toUpperCase()} | LENGTH: ${length.toUpperCase()} (${lengthNote})
 [INTRO & HOOK]
 ${hook}
 
-[THE PAPER'S THESIS & CONTEXT]
+[THE PAPER'S THESIS, CONTEXT & METHOD]
 ${body}
 
 [CORE FINDINGS & DISCOVERIES]
@@ -331,14 +336,14 @@ HOST A: Welcome back. Today we're reviewing a key study: "${art.title}".
 
 HOST B: Yes, this is a fascinating one by ${art.authors}.
 
-HOST A: Let's talk about the setup first. What did they set out to analyze?
+HOST A: Let's talk about the setup first. What did they set out to analyze and what methods did they use?
 
-HOST B: So, here's what the abstract lays out: 
+HOST B: So, here's what the research paper lays out: 
 "${body}"
 
-HOST A: That's super interesting. What were the key conclusions of the research?
+HOST A: That's super interesting. What were the key findings and final conclusions of the research?
 
-HOST B: Well, the key takeaways were:
+HOST B: Well, the key findings and conclusions were:
 "${conclusionPart}"
 
 HOST A: What does this mean for our listeners moving forward?
@@ -369,11 +374,35 @@ HOST B: Essentially, it means that ${outro}
     selectTone.addEventListener('change', updateScripts);
     selectLength.addEventListener('change', updateScripts);
 
-    const openConvertModal = (art) => {
+    const openConvertModal = async (art) => {
         modalTitle.textContent = `Convert: "${art.title.substring(0, 50)}..."`;
         stopSpeech();
-        updateScripts();
+        
+        // Show loading placeholder in scripts
+        ytScriptText.textContent = "Downloading and parsing PDF full text from CORE repositories... (This may take up to 10 seconds for large files)";
+        podScriptText.textContent = "Downloading and parsing PDF full text from CORE repositories... (This may take up to 10 seconds for large files)";
         modal.removeAttribute('hidden');
+
+        let fullTextArticle = { ...art };
+
+        if (art.downloadUrl) {
+            try {
+                const response = await fetch(`/api/article-fulltext?downloadUrl=${encodeURIComponent(art.downloadUrl)}`);
+                const data = await response.json();
+                if (data.success) {
+                    fullTextArticle.abstract = data.abstract;
+                    fullTextArticle.method = data.method;
+                    fullTextArticle.findings = data.findings;
+                    fullTextArticle.conclusion = data.conclusion;
+                }
+            } catch (err) {
+                console.error("Failed fetching full text PDF, falling back to metadata:", err);
+            }
+        }
+
+        // Set as current selected and render script
+        currentSelectedArticle = fullTextArticle;
+        updateScripts();
     };
 
     // Fetch Articles from Flask API
@@ -387,7 +416,8 @@ HOST B: Essentially, it means that ${outro}
         scholarList.innerHTML = createSkeleton();
 
         try {
-            const response = await fetch('/api/articles');
+            // Fix 3: Append timestamp to bust any browser/CDN cache
+            const response = await fetch(`/api/articles?_t=${Date.now()}`);
             const data = await response.json();
             
             if (data.success) {
